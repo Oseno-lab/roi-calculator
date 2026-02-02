@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fractional Chief of Staff ROI Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .calculator-container {
+            background: white;
+            border: 2px solid #000000;
+            border-radius: 0;
+            max-width: 700px;
+            width: 100%;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #000000;
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            border-bottom: 2px solid #000000;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+            font-weight: 400;
+        }
+        
+        .progress-bar {
+            display: flex;
+            background: #f5f5f5;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .progress-step {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #999;
+            border-right: 1px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+        
+        .progress-step:last-child {
+            border-right: none;
+        }
+        
+        .progress-step.active {
+            background: #000000;
+            color: white;
+        }
+        
+        .progress-step.completed {
+            background: #f5f5f5;
+            color: #000000;
+        }
+        
+        .content {
+            padding: 50px 40px;
+            min-height: 400px;
+        }
+        
+        .step {
+            display: none;
+        }
+        
+        .step.active {
+            display: block;
+            animation: fadeIn 0.4s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .question {
+            margin-bottom: 35px;
+        }
+        
+        .question h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #000000;
+            font-weight: 600;
+        }
+        
+        .question p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .option-btn {
+            padding: 18px 24px;
+            border: 2px solid #000000;
+            background: white;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.2s;
+            text-align: left;
+            color: #000000;
+        }
+        
+        .option-btn:hover {
+            background: #000000;
+            color: white;
+        }
+        
+        .option-btn.selected {
+            background: #000000;
+            color: white;
+        }
+        
+        .range-input {
+            margin-top: 20px;
+        }
+        
+        .range-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #000000;
+            margin-bottom: 15px;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 4px;
+            border-radius: 0;
+            background: #e0e0e0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 0;
+            background: #000000;
+            cursor: pointer;
+            border: 2px solid #000000;
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 0;
+            background: #000000;
+            cursor: pointer;
+            border: 2px solid #000000;
+        }
+        
+        .range-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 40px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 16px 24px;
+            border: 2px solid #000000;
+            background: white;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.2s;
+            color: #000000;
+        }
+        
+        .btn:hover {
+            background: #000000;
+            color: white;
+        }
+        
+        .btn-primary {
+            background: #000000;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: white;
+            color: #000000;
+        }
+        
+        .btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        
+        .btn:disabled:hover {
+            background: white;
+            color: #000000;
+        }
+        
+        /* Results Page */
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .result-card {
+            border: 2px solid #000000;
+            padding: 25px;
+        }
+        
+        .result-card h3 {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            color: #666;
+            font-weight: 600;
+        }
+        
+        .result-card .amount {
+            font-size: 36px;
+            font-weight: 700;
+            color: #000000;
+            margin-bottom: 8px;
+        }
+        
+        .result-card .period {
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .savings-card {
+            background: #000000;
+            color: white;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+            border: 2px solid #000000;
+        }
+        
+        .savings-card h2 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            opacity: 0.9;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .savings-card .amount {
+            font-size: 56px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .savings-card .details {
+            font-size: 14px;
+            opacity: 0.85;
+        }
+        
+        .breakdown-section {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #000000;
+        }
+        
+        .breakdown-section h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #000000;
+            font-weight: 600;
+        }
+        
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 14px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .breakdown-item:last-child {
+            border-bottom: none;
+        }
+        
+        .breakdown-item.total {
+            border-top: 2px solid #000000;
+            border-bottom: 2px solid #000000;
+            padding: 18px 0;
+            margin-top: 10px;
+            font-weight: 700;
+            font-size: 18px;
+        }
+        
+        .breakdown-label {
+            color: #333;
+            font-size: 15px;
+        }
+        
+        .breakdown-value {
+            font-weight: 600;
+            color: #000000;
+            font-size: 15px;
+        }
+        
+        .info-box {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            background: #fafafa;
+        }
+        
+        .info-box p {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.7;
+        }
+        
+        .source-note {
+            margin-top: 30px;
+            font-size: 11px;
+            color: #999;
+            text-align: center;
+            line-height: 1.5;
+        }
+        
+        @media (max-width: 640px) {
+            .content {
+                padding: 40px 25px;
+            }
+            
+            .header h1 {
+                font-size: 22px;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .result-card .amount {
+                font-size: 30px;
+            }
+            
+            .savings-card .amount {
+                font-size: 42px;
+            }
+            
+            .nav-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <div class="header">
+            <h1>Fractional Chief of Staff ROI Calculator</h1>
+            <p>Calculate your savings in under a minute</p>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-step active" id="progress-1">Location</div>
+            <div class="progress-step" id="progress-2">Role Level</div>
+            <div class="progress-step" id="progress-3">Timeline</div>
+            <div class="progress-step" id="progress-4">Hours</div>
+            <div class="progress-step" id="progress-5">Results</div>
+        </div>
+        
+        <div class="content">
+            <!-- Step 1: Country -->
+            <div class="step active" id="step-1">
+                <div class="question">
+                    <h2>Where are you located?</h2>
+                    <p>Salary benchmarks vary by region</p>
+                </div>
+                <div class="options">
+                    <button class="option-btn" onclick="selectCountry('us')">
+                        🇺🇸 United States
+                    </button>
+                    <button class="option-btn" onclick="selectCountry('canada')">
+                        🇨🇦 Canada
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Step 2: Role Level -->
+            <div class="step" id="step-2">
+                <div class="question">
+                    <h2>What level of support do you need?</h2>
+                    <p>Different roles command different compensation packages</p>
+                </div>
+                <div class="options">
+                    <button class="option-btn" onclick="selectRole('mid')">
+                        <strong>Mid-Level</strong><br>
+                        <small style="color: #666;">Operations Manager / Senior Coordinator</small>
+                    </button>
+                    <button class="option-btn" onclick="selectRole('senior')">
+                        <strong>Senior</strong><br>
+                        <small style="color: #666;">Chief of Staff / Director of Operations</small>
+                    </button>
+                    <button class="option-btn" onclick="selectRole('executive')">
+                        <strong>Executive</strong><br>
+                        <small style="color: #666;">VP of Operations / Senior Chief of Staff</small>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Step 3: Engagement Length -->
+            <div class="step" id="step-3">
+                <div class="question">
+                    <h2>How long do you need support?</h2>
+                    <p>Most fractional engagements start with 3-6 months</p>
+                </div>
+                <div class="options">
+                    <button class="option-btn" onclick="selectEngagement(3)">3 months</button>
+                    <button class="option-btn" onclick="selectEngagement(6)">6 months</button>
+                    <button class="option-btn" onclick="selectEngagement(9)">9 months</button>
+                    <button class="option-btn" onclick="selectEngagement(12)">12 months</button>
+                </div>
+            </div>
+            
+            <!-- Step 4: Hours -->
+            <div class="step" id="step-4">
+                <div class="question">
+                    <h2>How many hours per month?</h2>
+                    <p>Adjust the slider to match your needs</p>
+                </div>
+                <div class="range-input">
+                    <div class="range-value" id="hoursDisplay">80 hours/month</div>
+                    <input type="range" id="hoursSlider" min="60" max="100" value="80" step="5" oninput="updateHoursDisplay()">
+                    <div class="range-labels">
+                        <span>60 hrs (15/week)</span>
+                        <span>100 hrs (25/week)</span>
+                    </div>
+                </div>
+                <div class="nav-buttons">
+                    <button class="btn" onclick="previousStep()">← Back</button>
+                    <button class="btn btn-primary" onclick="showResults()">See Results →</button>
+                </div>
+            </div>
+            
+            <!-- Step 5: Results -->
+            <div class="step" id="step-5">
+                <div class="results-grid">
+                    <div class="result-card">
+                        <h3>Full-Time Hire</h3>
+                        <div class="amount" id="fullTimeCost">$0</div>
+                        <div class="period" id="fullTimePeriod">for 3 months</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h3>Fractional Chief of Staff</h3>
+                        <div class="amount" id="fractionalCost">$0</div>
+                        <div class="period" id="fractionalPeriod">for 3 months</div>
+                    </div>
+                </div>
+                
+                <div class="savings-card">
+                    <h2>Your Estimated Savings</h2>
+                    <div class="amount" id="savingsAmount">$0</div>
+                    <div class="details" id="savingsDetails">Save 0% compared to full-time hire</div>
+                </div>
+                
+                <div class="breakdown-section">
+                    <h3>Full-Time Cost Breakdown</h3>
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">Base Salary (prorated)</span>
+                        <span class="breakdown-value" id="baseSalary">$0</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">Benefits & Taxes (30%)</span>
+                        <span class="breakdown-value" id="benefits">$0</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">Recruiting & Onboarding</span>
+                        <span class="breakdown-value" id="recruiting">$4,700</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">Equipment & Overhead</span>
+                        <span class="breakdown-value" id="overhead">$2,000</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">Productivity Ramp-up Cost</span>
+                        <span class="breakdown-value" id="rampup">$0</span>
+                    </div>
+                    <div class="breakdown-item total">
+                        <span class="breakdown-label">TOTAL COST</span>
+                        <span class="breakdown-value" id="totalCost">$0</span>
+                    </div>
+                </div>
+                
+                <div class="info-box">
+                    <p><strong>Why fractional makes sense:</strong> You get experienced Chief of Staff support immediately, with no recruiting delays, benefits overhead, or productivity ramp-up period. Pay only for the hours you need, when you need them.</p>
+                </div>
+                
+                <div class="source-note">
+                    Calculations based on 2025 U.S. Bureau of Labor Statistics data, industry salary surveys<br>(Glassdoor, PayScale, Salary.com), and standard benefits multipliers (1.25-1.4x base salary).
+                </div>
+                
+                <div class="nav-buttons" style="margin-top: 40px;">
+                    <button class="btn" onclick="resetCalculator()">← Start Over</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentStep = 1;
+        const totalSteps = 5;
+        
+        const userData = {
+            country: null,
+            roleLevel: null,
+            engagementLength: null,
+            hoursPerMonth: 80
+        };
+        
+        const salaryData = {
+            us: {
+                mid: 95000,
+                senior: 165000,
+                executive: 230000
+            },
+            canada: {
+                mid: 85000,
+                senior: 140000,
+                executive: 195000
+            }
+        };
+        
+        const hourlyRate = 135;
+        
+        function updateProgress() {
+            for (let i = 1; i <= totalSteps; i++) {
+                const progressEl = document.getElementById(`progress-${i}`);
+                if (i < currentStep) {
+                    progressEl.className = 'progress-step completed';
+                } else if (i === currentStep) {
+                    progressEl.className = 'progress-step active';
+                } else {
+                    progressEl.className = 'progress-step';
+                }
+            }
+        }
+        
+        function showStep(stepNum) {
+            document.querySelectorAll('.step').forEach(step => {
+                step.classList.remove('active');
+            });
+            document.getElementById(`step-${stepNum}`).classList.add('active');
+            currentStep = stepNum;
+            updateProgress();
+        }
+        
+        function nextStep() {
+            if (currentStep < totalSteps) {
+                showStep(currentStep + 1);
+            }
+        }
+        
+        function previousStep() {
+            if (currentStep > 1) {
+                showStep(currentStep - 1);
+            }
+        }
+        
+        function selectCountry(country) {
+            userData.country = country;
+            document.querySelectorAll('#step-1 .option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+            setTimeout(() => nextStep(), 300);
+        }
+        
+        function selectRole(role) {
+            userData.roleLevel = role;
+            document.querySelectorAll('#step-2 .option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+            setTimeout(() => nextStep(), 300);
+        }
+        
+        function selectEngagement(months) {
+            userData.engagementLength = months;
+            document.querySelectorAll('#step-3 .option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+            setTimeout(() => nextStep(), 300);
+        }
+        
+        function updateHoursDisplay() {
+            const hours = document.getElementById('hoursSlider').value;
+            userData.hoursPerMonth = parseInt(hours);
+            document.getElementById('hoursDisplay').textContent = `${hours} hours/month`;
+        }
+        
+        function formatCurrency(amount, country) {
+            const locale = country === 'canada' ? 'en-CA' : 'en-US';
+            const currency = country === 'canada' ? 'CAD' : 'USD';
+            return new Intl.NumberFormat(locale, {
+                style: 'currency',
+                currency: currency,
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
+        
+        function showResults() {
+            const { country, roleLevel, engagementLength, hoursPerMonth } = userData;
+            
+            // Get annual salary
+            const annualSalary = salaryData[country][roleLevel];
+            
+            // Calculate full-time costs
+            const monthlySalary = annualSalary / 12;
+            const proratedSalary = monthlySalary * engagementLength;
+            
+            // Benefits at 30%
+            const benefits = proratedSalary * 0.30;
+            
+            // Fixed costs
+            const recruitingCost = 4700;
+            const overhead = 2000;
+            
+            // Ramp-up cost
+            let rampupCost = 0;
+            if (engagementLength >= 1) {
+                rampupCost = (monthlySalary * 0.75);
+            }
+            if (engagementLength >= 2) {
+                rampupCost += (monthlySalary * 0.50);
+            }
+            
+            const totalFullTime = proratedSalary + benefits + recruitingCost + overhead + rampupCost;
+            
+            // Calculate fractional costs
+            const totalHours = hoursPerMonth * engagementLength;
+            const fractionalTotal = totalHours * hourlyRate;
+            
+            // Calculate savings
+            const savings = totalFullTime - fractionalTotal;
+            const savingsPercent = ((savings / totalFullTime) * 100).toFixed(0);
+            
+            // Update UI
+            document.getElementById('fullTimeCost').textContent = formatCurrency(totalFullTime, country);
+            document.getElementById('fullTimePeriod').textContent = `for ${engagementLength} month${engagementLength > 1 ? 's' : ''}`;
+            
+            document.getElementById('fractionalCost').textContent = formatCurrency(fractionalTotal, country);
+            document.getElementById('fractionalPeriod').textContent = `for ${engagementLength} month${engagementLength > 1 ? 's' : ''} (${totalHours} hrs)`;
+            
+            document.getElementById('savingsAmount').textContent = formatCurrency(savings, country);
+            document.getElementById('savingsDetails').textContent = `Save ${savingsPercent}% compared to full-time hire`;
+            
+            // Update breakdown
+            document.getElementById('baseSalary').textContent = formatCurrency(proratedSalary, country);
+            document.getElementById('benefits').textContent = formatCurrency(benefits, country);
+            document.getElementById('recruiting').textContent = formatCurrency(recruitingCost, country);
+            document.getElementById('overhead').textContent = formatCurrency(overhead, country);
+            document.getElementById('rampup').textContent = formatCurrency(rampupCost, country);
+            document.getElementById('totalCost').textContent = formatCurrency(totalFullTime, country);
+            
+            nextStep();
+        }
+        
+        function resetCalculator() {
+            userData.country = null;
+            userData.roleLevel = null;
+            userData.engagementLength = null;
+            userData.hoursPerMonth = 80;
+            
+            document.getElementById('hoursSlider').value = 80;
+            updateHoursDisplay();
+            
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            showStep(1);
+        }
+    </script>
+</body>
+</html>
